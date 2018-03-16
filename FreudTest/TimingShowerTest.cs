@@ -12,7 +12,7 @@ namespace FreudTest
         FreudManager exprManager = new FreudManager(new ExpressionTypeInfoFactory());
 
         [Test]
-        public void TimesReflectionSerealize([Range(0, 10)]int _, [Values(100000)]int count)
+        public void TimesReflectionSerealize([Values(5000000)]int count)
         {
             var barInst = new TimesFoo()
             {
@@ -38,7 +38,7 @@ namespace FreudTest
         }
 
         [Test]
-        public void TimesExpressionSerealize([Range(0, 10)]int _, [Values(100000)]int count)
+        public void TimesExpressionSerealize([Values(5000000)]int count)
         {
             var barInst = new TimesFoo()
             {
@@ -64,7 +64,7 @@ namespace FreudTest
         }
 
         [Test]
-        public void TimesProtoSerealize([Range(0, 10)]int _, [Values(100000)]int count)
+        public void TimesProtoSerealize([Values(5000000)]int count)
         {
             var barInst = new TimesFoo()
             {
@@ -94,7 +94,7 @@ namespace FreudTest
         }
 
         [Test]
-        public void TimesCount([Range(0, 10)]int _, [Values(100000)]int count)
+        public void TimesCount([Values(5000000)]int count)
         {
             for (int i = 0; i < count; )
             {

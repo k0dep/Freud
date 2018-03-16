@@ -32,13 +32,23 @@ namespace Freud
 
         public void Serialize(object data, Stream stream)
         {
+            if (data == null)
+            {
+                stream.WriteByte(0xFF);
+                return;
+            }
+
+            stream.WriteByte(0);
+
             _serialize(data, stream);
         }
 
         public object Deserialize(Stream data)
         {
-            var res = _deserialize(data);
-            return res;
+            if (data.ReadByte() == 0xFF)
+                return null;
+
+            return _deserialize(data);
         }
 
 
@@ -123,38 +133,15 @@ namespace Freud
                 Expression.Lambda<Action<object, Stream>>(Expression.Block(serializeStatements.ToArray()),
                     sourceArgument, streamArgument);
 
+            _serialize = _serializExpression.Compile();
 
-            var s = _serializExpression.Compile();
-
-
-            var d = Expression.Lambda<Func<Stream, object>>(
-                    Expression.Block(new[] {instVariable},
-                        new[] {Expression.Assign(instVariable, Expression.New(type))}
+            _deserialize = Expression.Lambda<Func<Stream, object>>(
+                    Expression.Block(new[] { instVariable },
+                        new[] { Expression.Assign(instVariable, Expression.New(type)) }
                             .Concat(deserializeStatements.ToArray())
-                            .Concat(new[] {Expression.Convert(instVariable, typeof(Object))}).ToArray()),
+                            .Concat(new[] { Expression.Convert(instVariable, typeof(Object)) }).ToArray()),
                     streamArgument)
                 .Compile();
-
-            _serialize = (o, stream) =>
-            {
-                if (o == null)
-                {
-                    stream.WriteByte(0xFF);
-                    return;
-                }
-
-                stream.WriteByte(0);
-
-                s(o, stream);
-            };
-
-            _deserialize = stream =>
-            {
-                if (stream.ReadByte() == 0xFF)
-                    return null;
-
-                return d(stream);
-            };
 
             manager.TypeInfoCache[type] = this;
         }
