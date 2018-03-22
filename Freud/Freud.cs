@@ -54,15 +54,20 @@ namespace Freud
         }
 
 
-        public byte[] Serialize<T>(T source)
-        {
-            var type = typeof(T);
+        public byte[] Serialize(Type type, object source)
+        {            
             registerType(type);
             var s = new MemoryStream();
 
             TypeInfoCache[type].Serialize(source, s);
 
-            return s.GetBuffer();
+            return s.ToArray();
+        }
+
+
+        public byte[] Serialize<T>(T source)
+        {
+            return Serialize(typeof(T), source);
         }
 
         public T Deserialize<T>(byte[] data)
