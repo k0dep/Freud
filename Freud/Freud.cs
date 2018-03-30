@@ -28,7 +28,7 @@ namespace Freud
 
         private void registerDefaultPrimitives()
         {
-            TypeInfoCache[typeof(Boolean)] = new BooleanPrimitiveTypeInfo();
+            TypeInfoCache[typeof(Boolean)] = new PrimitiveTypeInfo();
 
             TypeInfoCache[typeof(Byte)] = new BytePrimitiveTypeInfo();
 

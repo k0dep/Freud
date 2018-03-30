@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Freud.PrimitiveTypInfo
 {
-    public class BooleanPrimitiveTypeInfo : ITypeInfo
+    public class PrimitiveTypeInfo : ITypeInfo
     {
         public Type TargetType { get { return typeof(Boolean); } }
 
