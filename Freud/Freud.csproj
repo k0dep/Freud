@@ -41,7 +41,7 @@
     <Compile Include="ExpressionTypeInfoFactory.cs" />
     <Compile Include="Freud.cs" />
     <Compile Include="IExpressionTypeInfo.cs" />
-    <Compile Include="PrimitiveTypInfo\BooleanPromotiveTypeInfo.cs" />
+    <Compile Include="PrimitiveTypInfo\BooleanPrimitiveTypeInfo.cs" />
     <Compile Include="ReflectionTypeInfo.cs" />
     <Compile Include="FreudTypeCheckException.cs" />
     <Compile Include="ITypeInfo.cs" />

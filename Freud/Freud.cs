@@ -72,10 +72,14 @@ namespace Freud
 
         public T Deserialize<T>(byte[] data)
         {
-            var type = typeof(T);
+            return (T) Deserialize(typeof(T), data);
+        }
+
+        public object Deserialize(Type type, byte[] data)
+        {
             registerType(type);
             var stream = new MemoryStream(data, false);
-            return (T) TypeInfoCache[type].Deserialize(stream);
+            return TypeInfoCache[type].Deserialize(stream);
         }
 
         private void registerType(Type type)
