@@ -131,16 +131,18 @@ namespace Freud
 
             _serializExpression =
                 Expression.Lambda<Action<object, Stream>>(Expression.Block(serializeStatements.ToArray()),
-                    sourceArgument, streamArgument);
+                    "serialize_<" + type.FullName + ">", true,
+                    new []{ sourceArgument, streamArgument });
 
             _serialize = _serializExpression.Compile();
 
             _deserialize = Expression.Lambda<Func<Stream, object>>(
-                    Expression.Block(new[] { instVariable },
-                        new[] { Expression.Assign(instVariable, Expression.New(type)) }
+                    Expression.Block(new[] {instVariable},
+                        new[] {Expression.Assign(instVariable, Expression.New(type))}
                             .Concat(deserializeStatements.ToArray())
-                            .Concat(new[] { Expression.Convert(instVariable, typeof(Object)) }).ToArray()),
-                    streamArgument)
+                            .Concat(new[] {Expression.Convert(instVariable, typeof(Object))}).ToArray()),
+                    "derialize_<" + type.FullName + ">", true,
+                    new[] {streamArgument})
                 .Compile();
 
             manager.TypeInfoCache[type] = this;

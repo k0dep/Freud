@@ -10,6 +10,8 @@ namespace Freud
         public Dictionary<Type, ITypeInfo> TypeInfoCache { get; set; }
         public ITypeInfoFactory TypeInfoFactory { get; set; }
 
+        private readonly MemoryStream BufferMemoryStream = new MemoryStream();
+
         public FreudManager()
         {
             TypeInfoCache = new Dictionary<Type, ITypeInfo>();
@@ -57,11 +59,11 @@ namespace Freud
         public byte[] Serialize(Type type, object source)
         {            
             registerType(type);
-            var s = new MemoryStream();
+            BufferMemoryStream.Seek(0, SeekOrigin.Begin);
 
-            TypeInfoCache[type].Serialize(source, s);
+            TypeInfoCache[type].Serialize(source, BufferMemoryStream);
 
-            return s.ToArray();
+            return BufferMemoryStream.ToArray();
         }
 
 

@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Freud", "Freud\Freud.csproj", "{A533766A-DAD6-4B88-B463-56195814F771}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreudTest", "FreudTest\FreudTest.csproj", "{26FB60E1-F6C3-46EE-90E9-C37A719105A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Freud.Test", "FreudTest\Freud.Test.csproj", "{26FB60E1-F6C3-46EE-90E9-C37A719105A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
