@@ -82,60 +82,10 @@ namespace Freud
 
             var elementInfo = manager.TypeInfoCache[type.GetElementType()];
 
-            _serialize = (o, s) => arraySerialize(o, s, elementInfo);
-            _deserialize = s => arrayDeserialize(s, type, elementInfo);
-        }
+            var arraySerializer = new ArrayTypeInfo(type, elementInfo);
 
-        private object arrayDeserialize(Stream stream, Type arrayType, ITypeInfo tInfo)
-        {
-            var intBuff = new byte[2];
-            stream.Read(intBuff, 0, 2);
-            var count = BitConverter.ToInt16(intBuff, 0);
-            var dimestions = new int[count];
-
-            for (int i = 0; i < count; i++)
-            {
-                stream.Read(intBuff, 0, 2);
-                dimestions[i] = BitConverter.ToInt16(intBuff, 0);
-            }
-
-            var array = (Array)Activator.CreateInstance(arrayType, dimestions.Cast<object>().ToArray());
-
-            var indices = new int[count];
-
-            for (int i = 0; i < count; i++)
-            {
-                var dimensionLen = dimestions[i];
-                for (int j = 0; j < dimensionLen; j++)
-                {
-                    array.SetValue(tInfo.Deserialize(stream), indices);
-                    indices[i] += 1;
-                }
-                indices[i] -= 1;
-            }
-
-            return array;
-        }
-
-        private void arraySerialize(object o, Stream stream, ITypeInfo tInfo)
-        {
-            var arr = ((Array) o);
-            stream.Write(BitConverter.GetBytes((short) arr.Rank), 0, 2);
-            for (int i = 0; i < arr.Rank; i++)
-                stream.Write(BitConverter.GetBytes((short)arr.GetLength(i)), 0, 2);
-
-            var indices = new int[arr.Rank];
-
-            for (int i = 0; i < arr.Rank; i++)
-            {
-                var dimensionLen = arr.GetLength(i);
-                for (int j = 0; j < dimensionLen; j++)
-                {
-                    tInfo.Serialize(arr.GetValue(indices), stream);
-                    indices[i] += 1;
-                }
-                indices[i] -= 1;
-            }                
+            _serialize = arraySerializer.Serialize;
+            _deserialize = arraySerializer.Deserialize;
         }
 
         private void registerGeneral(Type type, FreudManager manager)

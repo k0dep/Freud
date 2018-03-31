@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Freud.PrimitiveTypInfo
+namespace Freud.PrimitiveTypeInfo
 {
-    public class PrimitiveTypeInfo : ITypeInfo
+    public class BooleanPrimitiveTypeInfo : ITypeInfo
     {
         public Type TargetType { get { return typeof(Boolean); } }
 
@@ -244,4 +244,23 @@ namespace Freud.PrimitiveTypInfo
         }
     }
 
+
+    public class DateTimePrimitiveTypeInfo : ITypeInfo
+    {
+        public Type TargetType { get { return typeof(DateTime); } }
+
+
+        public void Serialize(object data, Stream s)
+        {
+            var dt = (DateTime) data;
+            s.Write(BitConverter.GetBytes(dt.ToBinary()), 0, sizeof(long));
+        }
+
+        public object Deserialize(Stream data)
+        {
+            var buffer = new byte[sizeof(long)];
+            data.Read(buffer, 0, buffer.Length);
+            return DateTime.FromBinary(BitConverter.ToInt64(buffer, 0));
+        }
+    }
 }

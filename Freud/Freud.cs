@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Freud.PrimitiveTypInfo;
+using Freud.PrimitiveTypeInfo;
 
 namespace Freud
 {
@@ -30,7 +30,7 @@ namespace Freud
 
         private void registerDefaultPrimitives()
         {
-            TypeInfoCache[typeof(Boolean)] = new PrimitiveTypeInfo();
+            TypeInfoCache[typeof(Boolean)] = new BooleanPrimitiveTypeInfo();
 
             TypeInfoCache[typeof(Byte)] = new BytePrimitiveTypeInfo();
 
@@ -53,6 +53,8 @@ namespace Freud
             TypeInfoCache[typeof(Double)] = new DoublePrimitiveTypeInfo();
 
             TypeInfoCache[typeof(String)] = new StringPrimitiveTypeInfo();
+
+            TypeInfoCache[typeof(DateTime)] = new DateTimePrimitiveTypeInfo();
         }
 
 

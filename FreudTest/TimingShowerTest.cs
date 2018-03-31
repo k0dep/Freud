@@ -2,43 +2,14 @@
 using NUnit.Framework;
 using ProtoBuf;
 using System.IO;
-using Freud.PrimitiveTypInfo;
+using Freud.PrimitiveTypeInfo;
 
 namespace FreudTest
 {
-    [TestFixture]
     public class TimingShowerTest
     {
-        FreudManager reflManager = new FreudManager(new ReflectionTypeInfoFactory());
         FreudManager exprManager = new FreudManager(new ExpressionTypeInfoFactory());
 
-        [Test]
-        public void TimesReflectionSerealize([Values(0)]int count)
-        {
-            var barInst = new TimesFoo()
-            {
-                field = 1244,
-                Prop = "kdjshosudh",
-                a = 1.2f,
-                _propBar = new Bar()
-                {
-                    field = 12343,
-                    Property = "asdsafas",
-                    Struct = new Foo()
-                    {
-                        field = 02342,
-                        Property = "sds",
-                    }
-                }
-            };
-
-            for (int i = 0; i < count; i++)
-            {
-                reflManager.Serialize(barInst);
-            }
-        }
-
-        [Test]
         public void TimesExpressionSerealize([Values(5000000)]int count)
         {
             var barInst = new TimesFoo()
@@ -64,7 +35,6 @@ namespace FreudTest
             }
         }
 
-        [Test]
         public void TimesProtoSerealize([Values(5000000)]int count)
         {
             var barInst = new TimesFoo()
@@ -94,7 +64,7 @@ namespace FreudTest
             }
         }
 
-        [Test]
+
         public void TimesCount([Values(5000000)]int count)
         {
             for (int i = 0; i < count; )
@@ -103,7 +73,7 @@ namespace FreudTest
             }
         }
 
-        [Test]
+
         public void TestStringPrimitiveTimes([Values(5000000)] int count)
         {
             var primitive = new StringPrimitiveTypeInfo();

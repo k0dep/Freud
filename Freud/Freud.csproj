@@ -37,18 +37,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayTypeInfo.cs" />
     <Compile Include="ExpressionTypeInfo.cs" />
     <Compile Include="ExpressionTypeInfoFactory.cs" />
     <Compile Include="Freud.cs" />
     <Compile Include="IExpressionTypeInfo.cs" />
     <Compile Include="PrimitiveTypeInfo.cs" />
-    <Compile Include="ReflectionTypeInfo.cs" />
     <Compile Include="FreudTypeCheckException.cs" />
     <Compile Include="ITypeInfo.cs" />
     <Compile Include="ITypeInfoFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReflectionTypeInfoFactory.cs" />
-    <Compile Include="StaticTypeInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -152,5 +152,17 @@ namespace FreudTest
             Is.EqualTo(freud.Deserialize<Bar>(bytes)).ApplyTo(data);
 
         }
+
+
+        [Test]
+        public void TestDateTime()
+        {
+            var now = DateTime.Now;
+
+            var freud = new FreudManager();
+            var bytes = freud.Serialize(now);
+
+            Is.EqualTo(freud.Deserialize<DateTime>(bytes)).ApplyTo(now);
+        }
     }
 }

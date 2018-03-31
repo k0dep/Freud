@@ -1,0 +1,8 @@
+language: csharp
+solution: Freud.sln
+install:
+  - nuget restore Freud.sln
+  - nuget install NUnit.ConsoleRunner -Version 3.8.0 -OutputDirectory testrunner
+script:
+  - xbuild /p:Configuration=Release Freud.sln
+  - mono ./testrunner/NUnit.ConsoleRunner.3.8.0/tools/nunit3-console.exe ./FreudTest/bin/Release/FreudTest.dll
