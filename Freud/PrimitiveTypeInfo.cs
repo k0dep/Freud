@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Freud.PrimitiveTypInfo
@@ -209,9 +208,10 @@ namespace Freud.PrimitiveTypInfo
 
             unsafe
             {
-                fixed (void* ptr = (string) data)
+                fixed (void* ptrdst = bytes)
+                fixed (void* ptrsrc = (string) data)
                 {
-                    Marshal.Copy(new IntPtr(ptr), bytes, 0, length);
+                    Buffer.MemoryCopy(ptrsrc, ptrdst, length, length);
                 }
             }
 
@@ -243,4 +243,5 @@ namespace Freud.PrimitiveTypInfo
             return res;
         }
     }
+
 }

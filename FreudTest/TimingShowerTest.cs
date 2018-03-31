@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using ProtoBuf;
 using System.IO;
+using Freud.PrimitiveTypInfo;
 
 namespace FreudTest
 {
@@ -102,7 +103,20 @@ namespace FreudTest
             }
         }
 
-        
+        [Test]
+        public void TestStringPrimitiveTimes([Values(5000000)] int count)
+        {
+            var primitive = new StringPrimitiveTypeInfo();
+            var memStream = new MemoryStream();
+
+            for (int i = 0; i < count; i++)
+            {
+                memStream.Seek(0, SeekOrigin.Begin);
+                primitive.Serialize("teststring", memStream);
+            }
+
+            memStream.Dispose();
+        }
     }
 
     [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
