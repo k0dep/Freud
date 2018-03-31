@@ -11,16 +11,13 @@ namespace Freud
     {
         public Type TargetType { get; private set; }
 
-        private Expression<Action<object, Stream>> _serializExpression;
-        private Expression<Action<object, Stream>> _deserializeExpression;
-
-        public Expression StreamExpression { get; set; }
-        public Expression ObjectExpresstion { get; set; }
-        public Expression SerializeExpression { get; set; }
-        public Expression DeserializeExpression { get; set; }
-
         private Action<object, Stream> _serialize;
         private Func<Stream, object> _deserialize;
+
+        private static readonly ParameterExpression _parameterExpression = Expression.Parameter(typeof(Object), "source");
+        private static readonly ParameterExpression ParameterExpression = Expression.Parameter(typeof(Stream), "stream");
+        private static readonly MethodInfo TypeInfoSerialize = typeof(ITypeInfo).GetMethod("Serialize");
+        private static readonly MethodInfo TypeInfoDeserialize = typeof(ITypeInfo).GetMethod("Deserialize");
 
 
         public ExpressionTypeInfo(Type targetType, FreudManager manager)
@@ -28,6 +25,7 @@ namespace Freud
             TargetType = targetType;
             registerType(targetType, manager);
         }
+
 
 
         public void Serialize(object data, Stream stream)
@@ -42,6 +40,7 @@ namespace Freud
 
             _serialize(data, stream);
         }
+
 
         public object Deserialize(Stream data)
         {
@@ -61,6 +60,7 @@ namespace Freud
                 throw new FreudTypeCheckException("Interface '" + type.FullName + "' founded", type, "interface");
         }
 
+
         private void registerType(Type type, FreudManager manager)
         {
             if (manager.TypeInfoCache.ContainsKey(type))
@@ -68,6 +68,102 @@ namespace Freud
 
             checkType(type);
 
+            if (type.IsArray)
+                registerArray(type, manager);
+            else
+                registerGeneral(type, manager);
+
+            manager.TypeInfoCache[type] = this;
+        }
+
+        private void registerArray(Type type, FreudManager manager)
+        {
+            registerType(type.GetElementType(), manager);
+
+            var elementInfo = manager.TypeInfoCache[type.GetElementType()];
+
+            _serialize = (o, s) => arraySerialize(o, s, elementInfo);
+            _deserialize = s => arrayDeserialize(s, type, elementInfo);
+        }
+
+        private object arrayDeserialize(Stream stream, Type arrayType, ITypeInfo tInfo)
+        {
+            var intBuff = new byte[2];
+            stream.Read(intBuff, 0, 2);
+            var count = BitConverter.ToInt16(intBuff, 0);
+            var dimestions = new int[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                stream.Read(intBuff, 0, 2);
+                dimestions[i] = BitConverter.ToInt16(intBuff, 0);
+            }
+
+            var array = (Array)Activator.CreateInstance(arrayType, dimestions.Cast<object>().ToArray());
+
+            var indices = new int[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                var dimensionLen = dimestions[i];
+                for (int j = 0; j < dimensionLen; j++)
+                {
+                    array.SetValue(tInfo.Deserialize(stream), indices);
+                    indices[i] += 1;
+                }
+                indices[i] -= 1;
+            }
+
+            return array;
+        }
+
+        private void arraySerialize(object o, Stream stream, ITypeInfo tInfo)
+        {
+            var arr = ((Array) o);
+            stream.Write(BitConverter.GetBytes((short) arr.Rank), 0, 2);
+            for (int i = 0; i < arr.Rank; i++)
+                stream.Write(BitConverter.GetBytes((short)arr.GetLength(i)), 0, 2);
+
+            var indices = new int[arr.Rank];
+
+            for (int i = 0; i < arr.Rank; i++)
+            {
+                var dimensionLen = arr.GetLength(i);
+                for (int j = 0; j < dimensionLen; j++)
+                {
+                    tInfo.Serialize(arr.GetValue(indices), stream);
+                    indices[i] += 1;
+                }
+                indices[i] -= 1;
+            }                
+        }
+
+        private void registerGeneral(Type type, FreudManager manager)
+        {
+            var dataMembers = GetAllowedTypeMembers(type);
+
+            var parts = SelectMemberSerializers(manager, dataMembers);
+
+            GenerateSerialization(manager, type, dataMembers, parts);
+        }
+
+
+        private static List<ITypeInfo> SelectMemberSerializers(FreudManager manager, List<MemberInfo> dataMembers)
+        {
+            var parts = new List<ITypeInfo>();
+
+            foreach (var dataMember in dataMembers)
+            {
+                var memberType = dataMember.PropertyOrFieldType();
+                var newInstance = new ExpressionTypeInfo(memberType, manager);
+                parts.Add(manager.TypeInfoCache[memberType]);
+            }
+            return parts;
+        }
+
+
+        private static List<MemberInfo> GetAllowedTypeMembers(Type type)
+        {
             var dataMembers = new List<MemberInfo>();
 
             foreach (var memberInfo in type.GetMembers())
@@ -75,78 +171,87 @@ namespace Freud
                 if (memberInfo.MemberType != MemberTypes.Field && memberInfo.MemberType != MemberTypes.Property)
                     continue;
 
-                if (memberInfo.MemberType == MemberTypes.Property && !((PropertyInfo)memberInfo).CanWrite && !((PropertyInfo)memberInfo).CanRead)
+                if (memberInfo.MemberType == MemberTypes.Property && !((PropertyInfo) memberInfo).CanWrite &&
+                    !((PropertyInfo) memberInfo).CanRead)
                     continue;
 
                 dataMembers.Add(memberInfo);
             }
+            return dataMembers;
+        }
 
 
-            var parts = new List<ITypeInfo>();
-
-            foreach (var dataMember in dataMembers)
-            {
-                Type memberType = null;
-                if (dataMember.MemberType == MemberTypes.Field)
-                {
-                    var field = (FieldInfo)dataMember;
-                    memberType = field.FieldType;
-                }
-
-                if (dataMember.MemberType == MemberTypes.Property)
-                {
-                    var prop = (PropertyInfo)dataMember;
-                    memberType = prop.PropertyType;
-                }
-
-                var newInstance = new ExpressionTypeInfo(memberType, manager);
-
-                parts.Add(manager.TypeInfoCache[memberType]);
-            }
-
+        private void GenerateSerialization(FreudManager manager, Type type, List<MemberInfo> dataMembers,
+            List<ITypeInfo> parts)
+        {
             var serializeStatements = new List<Expression>();
             var deserializeStatements = new List<Expression>();
-
-            var sourceArgument = Expression.Parameter(typeof(Object), "source");
-            var streamArgument = Expression.Parameter(typeof(Stream), "stream");
-
-            var typeInfoSerialize = typeof(ITypeInfo).GetMethod("Serialize");
-            var typeInfoDeserialize = typeof(ITypeInfo).GetMethod("Deserialize");
 
             var instVariable = Expression.Variable(type, "instance");
 
             for (int i = 0; i < dataMembers.Count; i++)
             {
-                var prop = Expression.PropertyOrField(Expression.Convert(sourceArgument, type), dataMembers[i].Name);
-                var constPart = Expression.Constant(parts[i]);
+                Expression serialization_call = null;
+                Expression deserialization_call = null;
 
-                serializeStatements.Add(
-                    Expression.Call(constPart, typeInfoSerialize, Expression.Convert(prop, typeof(Object)),
-                        streamArgument)
-                );
+                GenerateReferenceExpressions(type, instVariable, dataMembers[i], parts[i], out serialization_call,
+                    out deserialization_call);
 
-                deserializeStatements.Add(Expression.Assign(Expression.PropertyOrField(instVariable, dataMembers[i].Name),
-                    Expression.Convert(Expression.Call(constPart, typeInfoDeserialize, streamArgument), parts[i].TargetType)));
+                serializeStatements.Add(serialization_call);
+                deserializeStatements.Add(deserialization_call);
             }
 
-            _serializExpression =
-                Expression.Lambda<Action<object, Stream>>(Expression.Block(serializeStatements.ToArray()),
-                    "serialize_<" + type.FullName + ">", true,
-                    new []{ sourceArgument, streamArgument });
-
-            _serialize = _serializExpression.Compile();
+            _serialize = Expression.Lambda<Action<object, Stream>>(Expression.Block(serializeStatements.ToArray()),
+                "serialize_ref<" + type.FullName + ">", true,
+                new[] {_parameterExpression, ParameterExpression}).Compile();
 
             _deserialize = Expression.Lambda<Func<Stream, object>>(
                     Expression.Block(new[] {instVariable},
                         new[] {Expression.Assign(instVariable, Expression.New(type))}
                             .Concat(deserializeStatements.ToArray())
                             .Concat(new[] {Expression.Convert(instVariable, typeof(Object))}).ToArray()),
-                    "derialize_<" + type.FullName + ">", true,
-                    new[] {streamArgument})
+                    "derialize_ref<" + type.FullName + ">", true,
+                    new[] {ParameterExpression})
                 .Compile();
+        }
 
-            manager.TypeInfoCache[type] = this;
+
+        private static void GenerateReferenceExpressions(Type type, Expression instVariable, MemberInfo property,
+            ITypeInfo typeInfo,
+            out Expression serialization_call, out Expression deserialization_call)
+        {
+            var prop = Expression.PropertyOrField(Expression.Convert(_parameterExpression, type), property.Name);
+            var constPart = Expression.Constant(typeInfo);
+
+            serialization_call = Expression.Call(constPart, TypeInfoSerialize, Expression.Convert(prop, typeof(Object)),
+                ParameterExpression);
+
+            deserialization_call = Expression.Assign(
+                Expression.PropertyOrField(instVariable, property.Name),
+                Expression.Convert(Expression.Call(constPart, TypeInfoDeserialize, ParameterExpression),
+                    property.PropertyOrFieldType()));
+        }
+    }
+
+    public static class MemberInfoExtension
+    {
+        public static Type PropertyOrFieldType(this MemberInfo member)
+        {
+            if (member.MemberType == MemberTypes.Field)
+            {
+                var field = (FieldInfo)member;
+                return field.FieldType;
+            }
+
+            if (member.MemberType == MemberTypes.Property)
+            {
+                var prop = (PropertyInfo)member;
+                return prop.PropertyType;
+            }
+
+            return null;
         }
 
     }
 }
+

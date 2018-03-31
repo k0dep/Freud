@@ -111,6 +111,46 @@ namespace FreudTest
             Is.EqualTo(freud.Deserialize<string>(bytes)).ApplyTo(data);
         }
 
+        [Test]
+        public void TestArrayOfStruct([Values(new[]{1,2,3}, new int[0], null)] int[] data)
+        {
+            var freud = new FreudManager();
+            var bytes = freud.Serialize(data);
 
+            Is.EqualTo(freud.Deserialize<int[]>(bytes)).ApplyTo(data);
+        }
+
+
+        private static object[] MultiDimensionalArrays = {
+            new [,] {{1, 2}, {3, 4}},
+            new int[0, 0],
+            null
+        };
+
+        [Test]
+        [TestCaseSource(nameof(MultiDimensionalArrays))]
+        public void TestMultiDimensionalArrayOfStruct(int[,] data)
+        {
+            var freud = new FreudManager();
+            var bytes = freud.Serialize(data);
+
+            Is.EqualTo(freud.Deserialize<int[,]>(bytes)).ApplyTo(data);
+        }
+
+
+        private static object[] ArrayOfClassData = {
+            new Bar(){ field = 1, Property = "lol", Struct = new Foo(){field = 1, Property = String.Empty}},
+            null
+        };
+        [Test]
+        [TestCaseSource(nameof(ArrayOfClassData))]
+        public void TestArrayOfClass(Bar data)
+        {
+            var freud = new FreudManager();
+            var bytes = freud.Serialize(data);
+
+            Is.EqualTo(freud.Deserialize<Bar>(bytes)).ApplyTo(data);
+
+        }
     }
 }
