@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Freud</id>
+    <version>0.1.0-alpha</version>
+    <authors>Stanislav Petrov</authors>
+    <owners>Stanislav Petrov</owners>
+    <licenseUrl>https://raw.githubusercontent.com/CTAPbIuKODEP/Freud/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/CTAPbIuKODEP/Freud</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+	<copyright>Copyright Stanislav Petrov 2018</copyright>
+    <description>Freud is fast and simple serialization framework allow you construct and reconstruct sibmpe objects to/from byte array</description>
+    <releaseNotes></releaseNotes>
+    <tags>serialization fast binary</tags>
+    <dependencies>
+    </dependencies>
+  </metadata>
+   <files>
+    <file src="Freud\bin\Debug\Freud.dll" target="lib\net46\Freud.dll" />
+    <file src="Freud\bin\Debug\Freud.pdb" target="lib\net46\Freud.pdb" />
+  </files>
+</package>
