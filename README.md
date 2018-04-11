@@ -1,2 +1,2 @@
 # Freud serialization
-[![Travis-CI status](https://travis-ci.org/CTAPbIuKODEP/Freud.svg?branch=master)](https://travis-ci.org/CTAPbIuKODEP/Freud) [![Nuget status](https://buildstats.info/nuget/Freud?includePreReleases=true)](https://www.nuget.org/packages/Freud)
+[![Build Status](https://travis-ci.org/k0dep/Freud.svg?branch=master)](https://travis-ci.org/k0dep/Freud) [![Nuget status](https://buildstats.info/nuget/Freud?includePreReleases=true)](https://www.nuget.org/packages/Freud)
