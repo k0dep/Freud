@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/k0dep/Freud.svg?branch=master)](https://travis-ci.org/k0dep/Freud) [![Nuget status](https://buildstats.info/nuget/Freud?includePreReleases=true)](https://www.nuget.org/packages/Freud)
+[![BuildStatus](https://travis-ci.org/k0dep/Freud.svg?branch=master)](https://travis-ci.org/k0dep/Freud) [![Nugetstatus](https://buildstats.info/nuget/Freud?includePreReleases=true)](https://www.nuget.org/packages/Freud)
 
 ---
 
@@ -6,8 +6,8 @@
  Freud - сериализатор/десериализатор C# объектов в массив байт. Цель freud - предоставить простой инструмент для **быстрой** сериализации и десериализации **не сложных** объектов.
 
 # Возможности
- - Сериализация без подготовки классов(без аттрибутов, без регистрации в фреймворке)
- - Еффективность(~1.3x быстрее protobuf-net)
+ - Сериализация без подготовки классов(без атрибутов, без регистрации в фреймворке)
+ - Эффективность(~1.3x быстрее protobuf-net)
  - Простота
  - Возможность расширения
 
@@ -15,7 +15,7 @@
  - Не поддерживает полиморфизм, из этого следует:
    * В классах не должно быть свойств или полей с типом интерфейс/абстрактный класс
  - Dictionary<K, V> (скоро будет)
- - List<T> (ското будет)
+ - List<T> (скоро будет)
 
 # Пример использования
 ```csharp
